@@ -1,0 +1,10 @@
+google-genai
+pypdf
+pymupdf4llm
+faiss-cpu
+sentence-transformers
+langchain-text-splitters
+librosa
+python-dotenv
+pillow
+streamlit
