@@ -14,15 +14,19 @@ build/
 venv/
 env/
 
+# Outputs (generated files)
+outputs/*
+!outputs/.gitkeep
+
 # Inputs (patient data - never commit PHI)
 inputs/referral_audio.wav
 inputs/walter_schaefer/
 inputs/cynthia_ford/
 inputs/clinical_laboratory_agreement.pdf
 inputs/generated_prompts/
-
-# Outputs (generated files)
-outputs/
+inputs/generate_medical_documents.py
+inputs/generate_transcript_prompt.py
+inputs/prompt_templates/
 
 # Database (local only)
 database/*.db
