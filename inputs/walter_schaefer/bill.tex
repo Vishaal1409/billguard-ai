@@ -1,0 +1,157 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Define Modern Color Palette
+\definecolor{branddark}{HTML}{1A365D}     % Deep Slate Blue
+\definecolor{brandprimary}{HTML}{2B6CB0}  % Teal/Blue Accent
+\definecolor{brandsecondary}{HTML}{4A5568}% Charcoal Muted
+\definecolor{bglight}{HTML}{F7FAFC}       % Soft White Background
+\definecolor{borderlight}{HTML}{E2E8F0}   % Soft Border Gray
+\definecolor{alertgreen}{HTML}{2F855A}    % Muted Green for Success
+
+% TColorBox Configuration for modern styling
+\tcbset{
+    invoicebox/.style={
+        colback=bglight,
+        colframe=branddark,
+        arc=4mm,
+        left=15pt,
+        right=15pt,
+        top=15pt,
+        bottom=15pt,
+        boxrule=1pt
+    },
+    headerbox/.style={
+        colback=branddark,
+        colframe=branddark,
+        arc=0mm,
+        sharp corners,
+        left=20pt,
+        right=20pt,
+        top=20pt,
+        bottom=20pt,
+        boxrule=0pt
+    }
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+\begin{document}
+
+% ==================== HEADER BANNER ====================
+\begin{tcolorbox}[headerbox]
+    \begin{tabularx}{\textwidth}{X r}
+        \textcolor{white}{\fontsize{20pt}{24pt}\selectfont\bfseries BLUE RIDGE LABORATORIES} & 
+        \textcolor{white}{\fontsize{14pt}{18pt}\selectfont\bfseries BILLING STATEMENT} \\
+        \textcolor{white!80!branddark}{\small Clinical Diagnostics \& Analytics} & 
+        \textcolor{white!80!branddark}{\small Electronic Medical Record Copy}
+    \end{tabularx}
+\end{tcolorbox}
+
+\vspace{1em}
+
+% ==================== METADATA SUMMARY ====================
+\begin{tabularx}{\textwidth}{@{}X X X@{}}
+    {\bfseries\color{brandsecondary} INVOICE ID} & {\bfseries\color{brandsecondary} BILLING DATE} & {\bfseries\color{brandsecondary} DUE DATE} \\
+    INV-1972-665495 & June 03, 2026 & July 03, 2026 \\
+    \cmidrule(r){1-1}\cmidrule(lr){2-2}\cmidrule(l){3-3}
+\end{tabularx}
+
+\vspace{1.5em}
+
+% ==================== PATIENT \& FACILITY DETAILS ====================
+\begin{tcolorbox}[invoicebox]
+    {\fontsize{12pt}{14pt}\selectfont\bfseries\color{branddark} ACCOMMODATION \& PROVIDER INFORMATION}
+    \vspace{0.8em}
+    \hrule height 0.5pt pt\color{borderlight}
+    \vspace{0.8em}
+    
+    \begin{tabularx}{\textwidth}{@{}l X l X@{}}
+        {\bfseries Patient Name:} & Walter Schaefer* & {\bfseries Hospital Name:} & Welch-Brown Medical Center* \\
+        {\bfseries Patient ID:} & PT-1552-OZT & {\bfseries Department:} & Immunology & Serology \\
+        {\bfseries Date of Birth:} & 06/30/1949 & & \\
+        \addlinespace
+        \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+        \addlinespace
+        {\bfseries Ordered By (Physician):} & Dr. Gamble, MD* & {\bfseries Analyzed By (Tech):} & Andrew Leblanc, MLT* \\
+        {\bfseries Date Completed:} & May 24, 2026* & & \\
+    \end{tabularx}
+\end{tcolorbox}
+
+\vspace{0.5em}
+
+% ==================== TEST DETAILS ====================
+{\fontsize{13pt}{16pt}\selectfont\bfseries\color{branddark} CLINICAL SPECIMEN \& TEST DETAILS}
+\vspace{0.3em}
+\hrule height 1pt pt\color{brandprimary}
+\vspace{0.8em}
+
+\begin{tabularx}{\textwidth}{@{}l X l X@{}}
+    {\bfseries Test Billed:} & \textcolor{brandprimary}{\bfseries Complete Blood Count (CBC) with Differential*} & {\bfseries Specimen Type:} & Urine - Random \\
+    {\bfseries Sample ID:} & SMPL-86WV9151 & {\bfseries Result Status:} & Completed \\
+    {\bfseries Collection Date:} & May 21, 2026 at 12:00 AM & & \\
+\end{tabularx}
+
+\vspace{2em}
+
+% ==================== FINANCIAL BREAKDOWN ====================
+{\fontsize{13pt}{16pt}\selectfont\bfseries\color{branddark} FINANCIAL BREAKDOWN}
+\vspace{0.3em}
+\hrule height 1pt pt\color{brandprimary}
+\vspace{0.8em}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}X r@{}}
+    \rowcolor{bglight}
+    {\bfseries Description} & {\bfseries Amount (USD)} \\
+    \midrule
+    Base Laboratory Procedure Charge (Base Cost)* & \$ 324.63 \\
+    Additional Processing \& Handling Fees (Extra Fees)* & \$ 127.15 \\
+    Contracted Insurance Adjustment Adjustment & -\$ 314.97 \\
+    \midrule
+    \rowcolor{branddark!5}
+    {\fontsize{11pt}{13pt}\selectfont\bfseries\color{branddark} NET TOTAL DUE*} & {\fontsize{11pt}{13pt}\selectfont\bfseries\color{branddark} \$ 136.81} \\
+    \bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}
+
+\vspace{1.5em}
+
+% Insurance Check Box Callout
+\begin{tcolorbox}[colback=alertgreen!5, colframe=alertgreen, arc=2mm, boxrule=0.5pt, left=10pt, right=10pt, top=8pt, bottom=8pt]
+    \begin{tabularx}{\textwidth}{@{}X r@{}}
+        {\bfseries Insurance Coverage Applied?*} & \textcolor{alertgreen}{\bfseries YES ✓} \\
+    \end{tabularx}
+\end{tcolorbox}
+
+\vspace{1em}
+
+% ==================== PAYMENT ACCOUNTING ====================
+{\fontsize{12pt}{14pt}\selectfont\bfseries\color{brandsecondary} Transaction Ledger}
+\vspace{0.5em}
+\begin{tabularx}{\textwidth}{@{}X X X@{}}
+    {\bfseries Payment Method} & {\bfseries Transaction Reference} & {\bfseries Account Status} \\
+    Patient Account & TXN-IN11156808 & {\bfseries\color{brandprimary} PARTIALLY PAID} \\
+\end{tabularx}
+
+\vspace{4em}
+
+% ==================== SIGN-OFF FOOTER ====================
+\begin{tabularx}{\textwidth}{@{}X l@{}}
+    \textit{Thank you for choosing Blue Ridge Laboratories for your clinical diagnostics.} & Authorized Signatory:\\
+    & \\ \cline{2-2}
+    & Bethany Collins \\
+    & Billing Department \\
+    & Blue Ridge Laboratories \\
+\end{tabularx}
+
+\end{document}
