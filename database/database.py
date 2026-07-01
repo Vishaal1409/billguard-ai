@@ -1,31 +1,10 @@
-"""
-database.py
-------------
-Stage 1 (continued) and Stage 2 of the Healthcare Auditing Engine pipeline.
-
-Handles all SQLite database operations:
-- Creating the schema (patients, tickets, documents tables)
-- Validating/inserting patients
-- Creating and updating active tickets
-- Attaching lab report / bill documents to a ticket
-
-This is the persistence layer that everything else (checklist, agent, UI)
-will read from and write to.
-"""
-
 import sqlite3
 import os
 import pathlib
 from datetime import datetime
 
-# ── Database file location ──────────────────────────────────────────────────
 BASE_DIR = pathlib.Path(__file__).parent.parent   # project root
 DB_PATH  = BASE_DIR / "database" / "audit.db"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CONNECTION HELPER
-# ══════════════════════════════════════════════════════════════════════════════
 
 def get_connection():
     """
@@ -41,9 +20,7 @@ def get_connection():
     return conn
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 1 — Create the schema (3 tables)
-# ══════════════════════════════════════════════════════════════════════════════
+# Creating the schema (3 tables)
 
 def create_tables():
     """
@@ -59,8 +36,7 @@ def create_tables():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # ── Table 1: patients ───────────────────────────────────────────────
-    # Stores the exact 9 fields from mentor's spec Section 2A
+    # Table 1: patients 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS patients (
             patient_id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,8 +53,7 @@ def create_tables():
         )
     """)
 
-    # ── Table 2: tickets ────────────────────────────────────────────────
-    # One ticket per audit case. status moves: ACTIVE -> LAB_ATTACHED -> AUDITED
+    # Table 2: tickets 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tickets (
             ticket_id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,8 +65,7 @@ def create_tables():
         )
     """)
 
-    # ── Table 3: documents ──────────────────────────────────────────────
-    # Links uploaded files (lab report, bill) to a ticket
+    # Table 3: documents 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS documents (
             document_id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,9 +82,7 @@ def create_tables():
     print(f"[database] Tables created/verified at: {DB_PATH}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 2 — Validate patient, create ticket, attach documents
-# ══════════════════════════════════════════════════════════════════════════════
+# Validate patient, create ticket, attach documents
 
 def validate_patient(referral_json: dict) -> int:
     """
@@ -225,7 +197,6 @@ def attach_document(ticket_id: int, doc_path: str, doc_type: str) -> int:
 
     document_id = cursor.lastrowid
 
-    # Also bump the ticket's updated_at and status, so we can track progress
     cursor.execute("""
         UPDATE tickets SET updated_at = ?, status = ?
         WHERE ticket_id = ?
@@ -262,15 +233,12 @@ def get_ticket(ticket_id: int) -> dict:
     return dict(row) if row else None
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TEST RUNNER — run this file directly to set up the database
-# ══════════════════════════════════════════════════════════════════════════════
+# Running this file directly to set up the database
 
 if __name__ == "__main__":
     create_tables()
     print("[database] Task 1 complete — schema is ready.\n")
 
-    # ── Quick Task 2 test with fake data (real test happens in Task 3) ──
     print("="*60)
     print("TASK 2 QUICK TEST — using sample data")
     print("="*60)

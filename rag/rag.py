@@ -1,27 +1,3 @@
-"""
-rag.py
--------
-RAG (Retrieval Augmented Generation) pipeline for the Healthcare Auditing Engine.
-
-This file handles everything related to the legal contract search system
-your mentor described in Section 4 of the spec:
-
-    "The legal rules inside the contract must be split into chunks,
-     converted into search vectors, and stored in a database."
-
-Contains three main parts:
-1. chunk_contract()      - reads the PDF and splits into clause-level chunks
-2. build_faiss_index()   - embeds chunks using sentence-transformers + stores in FAISS
-3. search_contract()     - takes a plain English query and returns top matching clauses
-
-The contract is:
-    Aura Reproductive Health & Fertility Clinic  <-->  Nexus Diagnostics & Bio-Analytics Corp.
-    10 clauses covering referrals, billing, turnaround time, confidentiality, etc.
-
-Run this file directly to build and save the index to disk:
-    python rag/rag.py
-"""
-
 import os
 import json
 import pickle
@@ -32,19 +8,17 @@ import faiss
 from sentence_transformers import SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# ── Paths ───────────────────────────────────────────────────────────────────
+# Paths 
 BASE_DIR      = pathlib.Path(__file__).parent.parent          # project root
 CONTRACT_PATH = BASE_DIR / "inputs" / "clinical_laboratory_agreement.pdf"
 INDEX_PATH    = BASE_DIR / "rag"    / "contract_index.faiss"
 CHUNKS_PATH   = BASE_DIR / "rag"    / "chunks.json"
 
-# ── Embedding model (same one your mentor's requirements.txt specifies) ──────
+# Embedding model 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 1 — Extract and chunk the contract
-# ══════════════════════════════════════════════════════════════════════════════
+# Extracting and chunking the contract
 
 def chunk_contract(pdf_path: str = None) -> list[dict]:
     """
@@ -100,7 +74,6 @@ def chunk_contract(pdf_path: str = None) -> list[dict]:
 
     chunks = []
     for i, text in enumerate(raw_chunks):
-        # Detect which clause this chunk belongs to
         clause_label = "General"
         for clause_num, keywords in clause_keywords.items():
             if any(kw.lower() in text.lower() for kw in keywords):
@@ -127,9 +100,7 @@ def chunk_contract(pdf_path: str = None) -> list[dict]:
     return chunks
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 2 — Embed chunks and build FAISS index
-# ══════════════════════════════════════════════════════════════════════════════
+# Embed chunks and build FAISS index
 
 def build_faiss_index(chunks: list[dict] = None) -> tuple:
     """
@@ -187,10 +158,7 @@ def build_faiss_index(chunks: list[dict] = None) -> tuple:
 
     return index, chunks
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 3 — Search the contract
-# ══════════════════════════════════════════════════════════════════════════════
+# Search the contract
 
 def search_contract(query: str, top_k: int = 3) -> list[dict]:
     """
@@ -239,9 +207,7 @@ def search_contract(query: str, top_k: int = 3) -> list[dict]:
     return results
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TEST RUNNER — Run this file directly to build the index and test search
-# ══════════════════════════════════════════════════════════════════════════════
+# Running this file directly to build the index and test search
 
 if __name__ == "__main__":
 

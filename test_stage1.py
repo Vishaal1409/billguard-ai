@@ -1,24 +1,6 @@
-"""
-test_stage1.py
----------------
-Day 3, Task 3 — Tests the FULL Stage 1 pipeline end to end, exactly as
-described in mentor's spec:
-
-    Referral Uploaded (Audio/PDF) -> Extract fields -> Validate in Database
-    -> Create Active Ticket
-
-This chains together:
-    extractor.py  (Day 2 — extract_referral_from_pdf)
-    database.py   (Day 3 — validate_patient, create_ticket)
-
-Run this from the project root:
-    python test_stage1.py
-"""
-
 import sys
 import pathlib
 
-# Make sure Python can find agent/ and database/ as importable folders
 sys.path.append(str(pathlib.Path(__file__).parent / "agent"))
 sys.path.append(str(pathlib.Path(__file__).parent / "database"))
 
@@ -44,15 +26,15 @@ def run_stage1(patient_folder: str):
 
     referral_pdf_path = str(BASE / "inputs" / patient_folder / "referral.pdf")
 
-    # Step 1: Extract fields from the referral PDF (Day 2 — extractor.py)
+    # Step 1: Extract fields from the referral PDF 
     print("\n[Step 1] Extracting referral fields...")
     referral_json = extract_referral_from_pdf(referral_pdf_path)
 
-    # Step 2: Validate in database — insert patient if new (Day 3 — database.py)
+    # Step 2: Validate in database — insert patient if new 
     print("\n[Step 2] Validating patient in database...")
     patient_id = validate_patient(referral_json)
 
-    # Step 3: Create active ticket (Day 3 — database.py)
+    # Step 3: Create active ticket 
     print("\n[Step 3] Creating active ticket...")
     ticket_id = create_ticket(patient_id)
 
@@ -71,13 +53,13 @@ def run_stage1(patient_folder: str):
 
 if __name__ == "__main__":
 
-    # ── Run for Walter Schaefer ─────────────────────────────────────────
+    # Run for Walter Schaefer
     walter_patient_id, walter_ticket_id = run_stage1("walter_schaefer")
 
-    # ── Run for Cynthia Ford ────────────────────────────────────────────
+    # Run for Cynthia Ford 
     cynthia_patient_id, cynthia_ticket_id = run_stage1("cynthia_ford")
 
-    # ── Final summary ───────────────────────────────────────────────────
+    # Final summary 
     print("\n" + "="*60)
     print("STAGE 1 — FINAL SUMMARY")
     print("="*60)

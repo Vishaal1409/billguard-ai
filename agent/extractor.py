@@ -1,18 +1,3 @@
-"""
-extractor.py
-------------
-Stage 1 of the Healthcare Auditing Engine pipeline.
-
-Contains three functions:
-1. extract_referral_from_pdf()  - reads a referral PDF and returns 9-field JSON
-2. extract_referral_from_audio() - reads a WAV audio file and returns 9-field JSON
-3. extract_bill_from_pdf()      - reads a bill PDF and returns 8-field JSON
-
-All extraction is done using Google Gemini API (google-genai).
-PDF text is extracted using pymupdf4llm.
-Audio is loaded using librosa and sent to Gemini natively.
-"""
-
 import os
 import json
 import base64
@@ -22,19 +7,55 @@ import pymupdf4llm
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from google.genai import errors as genai_errors
+from tenacity import (
+    retry,
+    wait_exponential,
+    stop_after_attempt,
+    retry_if_exception_type,
+    before_sleep_log,
+)
+import logging
 
-# ── Load environment variables from .env ──────────────────────────────────────
+# Loading environment variables from .env 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL   = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 
-# ── Initialise Gemini client ──────────────────────────────────────────────────
+# Initialising Gemini client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+# Logging setup so tenacity can print retry attempts 
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger("extractor")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 1 — Extract referral fields from a PDF file
-# ══════════════════════════════════════════════════════════════════════════════
+# TENACITY RETRY WRAPPER
+
+@retry(
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    stop=stop_after_attempt(3),
+    retry=retry_if_exception_type(genai_errors.APIError),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    reraise=True,
+)
+def call_gemini(contents, response_mime_type="application/json", temperature=0.0):
+    """
+    Single choke-point for every Gemini call in this file.
+    Wrapping it once here means extract_referral_from_pdf(),
+    extract_referral_from_audio(), and extract_bill_from_pdf() all get
+    automatic retry-on-rate-limit for free, with zero extra code in them.
+    """
+    return client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            response_mime_type=response_mime_type,
+            temperature=temperature,
+        ),
+    )
+
+
+# Extracting referral fields from a PDF file
 
 def extract_referral_from_pdf(pdf_path: str) -> dict:
     """
@@ -50,13 +71,10 @@ def extract_referral_from_pdf(pdf_path: str) -> dict:
     """
 
     # Step 1: Convert PDF to markdown text using pymupdf4llm
-    # pymupdf4llm is better than pypdf for LLMs because it preserves
-    # table structure and layout which referral forms rely on heavily
     print(f"[extractor] Reading PDF: {pdf_path}")
     markdown_text = pymupdf4llm.to_markdown(pdf_path)
 
     # Step 2: Build the extraction prompt
-    # We tell Gemini exactly what fields to find and what format to return
     prompt = f"""
 You are a medical document parser. Read the referral document below and extract 
 exactly these 9 fields. Return ONLY a valid JSON object with these exact keys.
@@ -90,16 +108,9 @@ REFERRAL DOCUMENT:
 {markdown_text}
 """
 
-    # Step 3: Send to Gemini and request JSON response
+    # Step 3: Send to Gemini (via tenacity-wrapped call_gemini)
     print(f"[extractor] Sending referral text to Gemini ({GEMINI_MODEL})...")
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.0   # 0 = deterministic, best for structured extraction
-        )
-    )
+    response = call_gemini(contents=prompt)
 
     # Step 4: Parse and return the JSON
     result = json.loads(response.text)
@@ -107,16 +118,11 @@ REFERRAL DOCUMENT:
     return result
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 2 — Extract referral fields from an audio WAV file
-# ══════════════════════════════════════════════════════════════════════════════
+# Extracting referral fields from an audio WAV file
 
 def extract_referral_from_audio(audio_path: str) -> dict:
     """
     Reads an audio WAV referral file and extracts exactly 9 fields using Gemini.
-
-    The audio is a phone call between a provider's office and a lab.
-    Gemini natively understands audio — no manual transcription needed.
 
     Args:
         audio_path: Full path to the WAV audio file.
@@ -125,18 +131,15 @@ def extract_referral_from_audio(audio_path: str) -> dict:
         Same 9-field dictionary as extract_referral_from_pdf().
     """
 
-    # Step 1: Load audio using librosa (from mentor's requirements.txt)
-    # librosa loads the WAV and gives us the raw audio data and sample rate
+    # Step 1: Load audio using librosa
     print(f"[extractor] Loading audio file: {audio_path}")
     audio_data, sample_rate = librosa.load(audio_path, sr=None, mono=True)
 
     # Step 2: Convert audio to bytes for Gemini
-    # Gemini accepts audio as base64-encoded bytes
-    # We convert the numpy array back to 16-bit PCM WAV bytes
     audio_int16 = (audio_data * 32767).astype(np.int16)
     audio_bytes  = audio_int16.tobytes()
 
-    # Step 3: Build the extraction prompt (same 9 fields as PDF version)
+    # Step 3: Build the extraction prompt
     prompt = """
 You are a medical document parser. Listen to this audio recording carefully.
 It is a phone call between a healthcare provider's office and a laboratory,
@@ -171,10 +174,9 @@ Return format — exactly this JSON structure:
 }
 """
 
-    # Step 4: Send audio + prompt to Gemini (multimodal — Module 6)
+    # Step 4: Send audio + prompt to Gemini (via tenacity-wrapped call_gemini)
     print(f"[extractor] Sending audio to Gemini ({GEMINI_MODEL}) for extraction...")
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
+    response = call_gemini(
         contents=[
             types.Part(
                 inline_data=types.Blob(
@@ -183,11 +185,7 @@ Return format — exactly this JSON structure:
                 )
             ),
             types.Part(text=prompt)
-        ],
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.0
-        )
+        ]
     )
 
     # Step 5: Parse and return the JSON
@@ -196,9 +194,7 @@ Return format — exactly this JSON structure:
     return result
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASK 3 — Extract bill fields from a bill PDF file
-# ══════════════════════════════════════════════════════════════════════════════
+# Extracting bill fields from a bill PDF file
 
 def extract_bill_from_pdf(pdf_path: str) -> dict:
     """
@@ -218,7 +214,6 @@ def extract_bill_from_pdf(pdf_path: str) -> dict:
     markdown_text = pymupdf4llm.to_markdown(pdf_path)
 
     # Step 2: Build the extraction prompt
-    # Note: bill_info is a NESTED JSON — this is Module 3 structured schema output
     prompt = f"""
 You are a medical billing document parser. Read the invoice/bill below and extract 
 exactly these 8 fields. Return ONLY a valid JSON object with these exact keys.
@@ -257,16 +252,9 @@ BILL DOCUMENT:
 {markdown_text}
 """
 
-    # Step 3: Send to Gemini and request JSON response
+    # Step 3: Send to Gemini (via tenacity-wrapped call_gemini)
     print(f"[extractor] Sending bill text to Gemini ({GEMINI_MODEL})...")
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.0
-        )
-    )
+    response = call_gemini(contents=prompt)
 
     # Step 4: Parse and return the JSON
     result = json.loads(response.text)
@@ -274,16 +262,13 @@ BILL DOCUMENT:
     return result
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TEST RUNNER — Run this file directly to test all 3 functions
-# ══════════════════════════════════════════════════════════════════════════════
+# Run this file directly to test all 3 functions
 
 if __name__ == "__main__":
 
     import pathlib
 
-    # Base path — adjust if your folder structure is different
-    BASE = pathlib.Path(__file__).parent.parent  # goes up from agent/ to project root
+    BASE = pathlib.Path(__file__).parent.parent
 
     print("\n" + "="*60)
     print("TEST 1: Referral PDF — Walter Schaefer")
