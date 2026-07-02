@@ -354,7 +354,7 @@ All files in `inputs/` contain Protected Health Information (PHI). These are nev
 |-----|------|---------------|
 | 1 | Jun 26 | Project setup, folder structure, .env, dependencies |
 | 2 | Jun 29| `extractor.py` — PDF + audio extraction → JSON |
-| 3 | Jul 30 | `database.py` — SQLite schema + patient/ticket functions |
+| 3 | Jun 30 | `database.py` — SQLite schema + patient/ticket functions |
 | 4 | Jul 1 | `rag.py` — contract chunking + FAISS index + search |
 | 5 | Jul 2 | `checklist.py` — 6-point verification engine |
 | 6 | Jul 3 | `agent.py` — chatbot with tool calling + session memory |
