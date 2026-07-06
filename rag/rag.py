@@ -17,7 +17,6 @@ CHUNKS_PATH   = BASE_DIR / "rag"    / "chunks.json"
 # Embedding model 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
-
 # Extracting and chunking the contract
 
 def chunk_contract(pdf_path: str = None) -> list[dict]:
@@ -205,7 +204,6 @@ def search_contract(query: str, top_k: int = 3) -> list[dict]:
         results.append(chunk)
 
     return results
-
 
 # Running this file directly to build the index and test search
 
