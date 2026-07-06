@@ -358,16 +358,8 @@ All files in `inputs/` contain Protected Health Information (PHI). These are nev
 | 4 | Jul 1 | `rag.py` — contract chunking + FAISS index + search |
 | 5 | Jul 2 | `checklist.py` — 6-point verification engine |
 | 6 | Jul 3 | `agent.py` — chatbot with tool calling + session memory |
-| 7 | Jul 6 | `ui/app.py` — Streamlit web interface |
-| 8 | Jul 7 | Testing, cleanup, final spec check |
-
----
-
-## 🔜 Coming Soon (Days 6-8)
-
-- `agent/agent.py` — Auditor chatbot with Gemini function calling, ReAct loop, and session memory
-- `ui/app.py` — Streamlit single-page app with upload panel, checklist dashboard, and chatbot
-- Full end-to-end testing on both patient test cases
+| 7 | Jul 7 | `ui/app.py` — Streamlit web interface |
+| 8 | Jul 8 | Testing, cleanup, final spec check |
 
 ---
 
