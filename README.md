@@ -1,13 +1,13 @@
-# 🏥 BillGuard AI
+# BillGuard AI
 ### Healthcare Billing Auditing Engine
 
 An AI-powered auditing pipeline that reads patient referrals (audio or PDF), extracts structured data, validates invoices against a legal contract using RAG, and surfaces a 6-point compliance checklist through a Streamlit web app.
 
-> Built as a Data Science (Agent) capstone project — Internship 2026
+> Built by Vishaal as a Data Science (Agent) capstone project — Internship 2026
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 **Who uses this app?** A Billing Auditor who manages clinic billing.
 
@@ -19,7 +19,7 @@ An AI-powered auditing pipeline that reads patient referrals (audio or PDF), ext
 
 ---
 
-## 🔍 Pipeline Overview
+## Pipeline Overview
 
 ```
 Stage 1 — Referral Intake
@@ -153,7 +153,7 @@ This reads the contract PDF, chunks it into 16 clause-level segments, embeds the
 
 ---
 
-## 🚀 Running the Project
+## Running the Project
 
 ### Run the full Streamlit app
 ```bash
@@ -177,7 +177,7 @@ python agent/checklist.py
 
 ---
 
-## 📋 Data Formats
+## Data Formats
 
 ### A. Referral JSON (9 fields — from audio or PDF)
 
@@ -208,7 +208,7 @@ python agent/checklist.py
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 Three tables stored in `database/audit.db`:
 
@@ -224,7 +224,7 @@ Links uploaded files (lab report, bill) to their ticket via `ticket_id`, `doc_ty
 
 ---
 
-## 📜 The Contract — RAG Source (10 Clauses)
+## The Contract — RAG Source (10 Clauses)
 
 The `clinical_laboratory_agreement.pdf` is the legal agreement between **Aura Reproductive Health & Fertility Clinic** and **Nexus Diagnostics & Bio-Analytics Corp.** It contains 10 clauses that the RAG system indexes and searches:
 
@@ -269,7 +269,7 @@ Each item returns:
 
 ---
 
-## 🤖 The Auditor Chatbot
+## The Auditor Chatbot
 
 The chatbot (built in `agent/agent.py`) uses Gemini function calling with three tools:
 
@@ -294,7 +294,7 @@ AI: "That would be Clause 6 — Patient Billing, Insurance Coordination
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Library | Role in Project |
 |---------|----------------|
@@ -312,7 +312,7 @@ AI: "That would be Clause 6 — Patient Billing, Insurance Coordination
 
 ---
 
-## 🧪 Test Cases
+## Test Cases
 
 Two complete patient test cases provided by mentor:
 
@@ -360,7 +360,3 @@ All files in `inputs/` contain Protected Health Information (PHI). These are nev
 | 6 | Jul 3 | `agent.py` — chatbot with tool calling + session memory |
 | 7 | Jul 7 | `ui/app.py` — Streamlit web interface |
 | 8 | Jul 8 | Testing, cleanup, final spec check |
-
----
-
-*Built by Vishaal — Data Science (Agent) Internship Capstone, 2026*
