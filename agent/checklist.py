@@ -234,32 +234,31 @@ Return ONLY this JSON:
 """
     ))
 
-    # Item 6: Doctor match 
+    # Item 6: Test type contract compliance (uses RAG — Clause 2/3)
+    capability_clauses = search_contract("laboratory testing capabilities equipment test menu", top_k=2)
+    clause_text_6      = "\n".join([c["text"] for c in capability_clauses])
+    clause_ref_6       = ", ".join(list(dict.fromkeys([c["clause"] for c in capability_clauses])))
+
     results.append(check_item(
         item_num=6,
-        title="Ordering Doctor Match",
-        clause="N/A — direct comparison",
+        title="Test Type Contract Compliance",
+        clause=clause_ref_6,
         prompt=f"""
-You are a billing auditor performing a verification check.
+You are a billing auditor performing a contract compliance check.
 
-REFERRAL drawn by (ordering doctor): "{referral_json.get('phone')}"
-BILL ordered by (physician):         "{bill_json.get('drawn_by')}"
+BILL test billed: "{bill_json.get('test_type')}"
 
-Note: The referral document uses "Drawn by" to mean the person who collected
-the specimen — use the provider/doctor name from the referral context.
-The referral provider is the ordering doctor who signed the referral.
+CONTRACT RULE (Lab's certified testing capabilities):
+{clause_text_6}
 
-REFERRAL ordering provider context: The referral was ordered for test:
-"{referral_json.get('test_type')}" for patient "{referral_json.get('patient_name')}"
-
-BILL drawn_by field: "{bill_json.get('drawn_by')}"
-
-Task: Check if the doctor named in the bill as the ordering physician
-is consistent with the referral context. If consistent: PASS. If a
-completely different doctor is named with no connection: FAIL.
+Task: Check if the test billed falls within the Laboratory's certified testing
+capabilities described in the contract (routine diagnostics, endocrine assays,
+toxicology panels, male fertility screens, etc.), or is a reasonably standard
+clinical lab test the Laboratory would be expected to perform.
+If it's within scope: PASS. If clearly outside the Lab's described capabilities: FAIL.
 
 Return ONLY this JSON:
-{{"status": "PASS" or "FAIL", "reason": "one sentence explanation"}}
+{{"status": "PASS" or "FAIL", "reason": "one sentence explanation citing the contract clause"}}
 """
     ))
     # Final summary 

@@ -1,8 +1,6 @@
 import os
 import json
 import base64
-import librosa
-import numpy as np
 import pymupdf4llm
 from dotenv import load_dotenv
 from google import genai
@@ -131,15 +129,15 @@ def extract_referral_from_audio(audio_path: str) -> dict:
         Same 9-field dictionary as extract_referral_from_pdf().
     """
 
-    # Step 1: Load audio using librosa
+    # Step 1: Read the WAV file bytes directly — no re-encoding needed,
+    # since the file is already a valid WAV. (Previously this loaded
+    # via librosa and re-packed as raw PCM int16, which strips the WAV
+    # header and can confuse Gemini's audio parser.)
     print(f"[extractor] Loading audio file: {audio_path}")
-    audio_data, sample_rate = librosa.load(audio_path, sr=None, mono=True)
+    with open(audio_path, "rb") as f:
+        audio_bytes = f.read()
 
-    # Step 2: Convert audio to bytes for Gemini
-    audio_int16 = (audio_data * 32767).astype(np.int16)
-    audio_bytes  = audio_int16.tobytes()
-
-    # Step 3: Build the extraction prompt
+    # Step 2: Build the extraction prompt
     prompt = """
 You are a medical document parser. Listen to this audio recording carefully.
 It is a phone call between a healthcare provider's office and a laboratory,
@@ -174,7 +172,7 @@ Return format — exactly this JSON structure:
 }
 """
 
-    # Step 4: Send audio + prompt to Gemini (via tenacity-wrapped call_gemini)
+    # Step 3: Send audio + prompt to Gemini (via tenacity-wrapped call_gemini)
     print(f"[extractor] Sending audio to Gemini ({GEMINI_MODEL}) for extraction...")
     response = call_gemini(
         contents=[
@@ -188,7 +186,7 @@ Return format — exactly this JSON structure:
         ]
     )
 
-    # Step 5: Parse and return the JSON
+    # Step 4: Parse and return the JSON
     result = json.loads(response.text)
     print(f"[extractor] Audio extraction complete for: {result.get('patient_name', 'Unknown')}")
     return result
