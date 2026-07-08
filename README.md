@@ -254,7 +254,7 @@ The AI compares the referral, bill, database, and contract to generate this chec
 | 3 | Hospital name matches between referral and bill | referral JSON vs bill JSON |
 | 4 | Billing method complies with contract | bill JSON vs Clause 6 (RAG) |
 | 5 | Insurance coverage correctly applied | bill JSON vs Clause 6 (RAG) |
-| 6 | Ordering doctor consistent across documents | referral JSON vs bill JSON |
+| 6 | Billed test falls within Lab's certified testing capabilities | bill JSON vs Clause 2/3 (RAG) |
 
 Each item returns:
 ```json
