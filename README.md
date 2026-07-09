@@ -359,4 +359,4 @@ All files in `inputs/` contain Protected Health Information (PHI). These are nev
 | 5 | Jul 2 | `checklist.py` — 6-point verification engine |
 | 6 | Jul 3 | `agent.py` — chatbot with tool calling + session memory |
 | 7 | Jul 7 | `ui/app.py` — Streamlit web interface |
-| 8 | Jul 8 | Testing, cleanup, final spec check |
+| 8 | Jul 9 | Testing, cleanup, final spec check |
